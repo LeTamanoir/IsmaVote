@@ -39,6 +39,10 @@ contract VotingSystem {
         address[] memory authorized,
         uint256 endTimestamp
     ) public {
+        require(bytes(title).length != 0, "Wrong EndTime inputted");
+        require(bytes(description).length != 0, "Wrong EndTime inputted");
+        require(endTimestamp > block.timestamp, "Wrong EndTime inputted");
+
         _authorized[_votesPolls.length] = authorized;
 
         _votesPolls.push(
@@ -55,15 +59,28 @@ contract VotingSystem {
         );
     }
 
-    function getPoll(uint256 _idx) public view returns (VotePoll memory) {
+    function getPoll(uint256 _idx) private view returns (VotePoll memory) {
         return _votesPolls[_idx];
     }
 
-    function getPolls() public view returns (VotePoll[] memory) {
+    function getPolls() private view returns (VotePoll[] memory) {
         return _votesPolls;
     }
 
+    function isAuthorizedAddress(uint256 _idx) public view returns (bool) {
+        address[] memory authorizedAddresses = _authorized[_idx];
+
+        for (uint i = 0; i < authorizedAddresses.length; i++) {
+            if (msg.sender == authorizedAddresses[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function votePoll(uint256 _idx, VoteChoice choice) public {
+        require(isAuthorizedAddress(_idx), "Invalid Address");
+        
         if (choice == VoteChoice.For) {
             _votesPolls[_idx].nb_for++;
         } else if (choice == VoteChoice.Against) {
