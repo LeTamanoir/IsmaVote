@@ -1,5 +1,5 @@
 import { VStack } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import CreatePoll from "../components/CreatePollModal";
 import Navbar from "../components/Navbar";
@@ -7,7 +7,15 @@ import PollList from "../components/PollList";
 import useWeb3 from "../hooks/useWeb3";
 
 const App = (): JSX.Element => {
-  const { myAddress, checkWallet } = useWeb3();
+  const { myAddress, checkWallet, loadContract } = useWeb3();
+  const contract = useRef<any>(null);
+
+  useEffect(() => {
+    if (myAddress.length === 0) return;
+    if (contract.current !== null) return;
+
+    contract.current = loadContract();
+  }, [myAddress]);
 
   useEffect(() => {
     checkWallet();
@@ -19,8 +27,8 @@ const App = (): JSX.Element => {
 
       {myAddress.length > 0 ? (
         <>
-          <CreatePoll />
-          <PollList myAddress={myAddress} />
+          <CreatePoll myAddress={myAddress} contract={contract} />
+          <PollList myAddress={myAddress} contract={contract} />
         </>
       ) : (
         <ConnectWallet />

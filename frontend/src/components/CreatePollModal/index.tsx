@@ -13,7 +13,13 @@ import { useReducer, useRef } from "react";
 import PollForm from "./PollForm";
 import type { CreatePoll, CreatePollError } from "../../types/poll";
 
-const CreatePoll = (): JSX.Element => {
+const CreatePoll = ({
+  contract,
+  myAddress,
+}: {
+  contract: any;
+  myAddress: string;
+}): JSX.Element => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = useReducer(
     (p: CreatePoll, n: Partial<CreatePoll>) => ({ ...p, ...n }),
@@ -76,7 +82,17 @@ const CreatePoll = (): JSX.Element => {
       return;
     }
 
-    console.log(data);
+    contract.current.methods
+      .createPoll(
+        data.title,
+        data.description,
+        data.authorized,
+        data.enddate.getTime()
+      )
+      .send({ from: myAddress })
+      .then((e: any) => {
+
+      });
     onClose();
   };
 

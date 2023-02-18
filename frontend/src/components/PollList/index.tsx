@@ -20,11 +20,35 @@ const TEMP: Poll[] = [
   },
 ];
 
-const PollList = ({ myAddress }: { myAddress: string }): JSX.Element => {
+const PollList = ({
+  myAddress,
+  contract,
+}: {
+  myAddress: string;
+  contract: any;
+}): JSX.Element => {
   const [polls, setPolls] = useState<Poll[]>([]);
 
   useEffect(() => {
-    setPolls(TEMP);
+    // setPolls(TEMP);
+
+    if (contract.current == null) return;
+
+    console.log(contract.current.methods.getPolls());
+
+
+    // contract.current.methods
+    //   .getPoll(0)
+    //   .send({ from: myAddress })
+    //   .then((poll: Poll) => {
+    //     console.log(poll);
+    //   });
+
+    // .call()
+    // .then((polls: Poll[]) => {
+    //   // setPolls(polls);
+    //   console.log(polls);
+    // });
   }, []);
 
   return (
@@ -32,6 +56,12 @@ const PollList = ({ myAddress }: { myAddress: string }): JSX.Element => {
       {polls.map((poll) => (
         <PollItem myAddress={myAddress} key={poll.address} poll={poll} />
       ))}
+
+      <button onClick={() => {
+        contract.current.methods.getPolls().call();
+      }}>
+        test
+      </button>
     </VStack>
   );
 };
