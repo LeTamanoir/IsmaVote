@@ -1,30 +1,30 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+enum VoteChoice {
+    For,
+    Against
+}
+
+struct VotePoll {
+    string title;
+    string description;
+    uint256 nb_for;
+    uint256 nb_against;
+    address owner;
+    uint256 startTimestamp;
+    uint256 endTimestamp;
+    bool isActive;
+}
+
 contract VotingSystem {
-    enum VoteChoice {
-        For,
-        Against
-    }
-
-    struct VotePoll {
-        string title;
-        string description;
-        uint256 nb_for;
-        uint256 nb_against;
-        address owner;
-        uint256 startTimestamp;
-        uint256 endTimestamp;
-        bool isActive;
-    }
-
     mapping(uint256 => address[]) private _authorized;
     mapping(uint256 => mapping(address => VoteChoice)) private _choices;
+    VotePoll[] private _votesPolls;
 
-    VotePoll[] public _votesPolls;
     address owner;
 
-    constructor() public {
+    constructor() {
         owner = address(this);
     }
 
@@ -39,6 +39,8 @@ contract VotingSystem {
         address[] memory authorized,
         uint256 endTimestamp
     ) public {
+        _authorized[_votesPolls.length] = authorized;
+
         _votesPolls.push(
             VotePoll({
                 title: title,
@@ -51,8 +53,6 @@ contract VotingSystem {
                 isActive: true
             })
         );
-
-        _authorized[_votesPolls.length] = authorized;
     }
 
     function getPoll(uint256 _idx) public view returns (VotePoll memory) {
@@ -72,7 +72,7 @@ contract VotingSystem {
         _choices[_idx][msg.sender] = choice;
     }
 
-    function deletePoll(uint256 _idx, address only_owner) public OnlyOwner {
+    function deletePoll(uint256 _idx) public OnlyOwner {
         _votesPolls[_idx].isActive = false;
     }
 }
