@@ -13,21 +13,36 @@ contract VotingSystem {
         uint256 nb_for;
         uint256 nb_against;
         address owner;
-        uint256 starttimestamp;
-        uint256 endtimestamp;
-        bool active;
+        uint256 startTimestamp;
+        uint256 endTimestamp;
+        bool isActive;
     }
 
     mapping(uint256 => address[]) private _authorized;
     mapping(uint256 => mapping(address => VoteChoice)) private _choices;
 
-    VotePoll[] private _votesPolls;
+    VotePoll[] public _votesPolls;
 
     function createPoll(
         string memory title,
         string memory description,
-        address[] memory authorized
-    ) public {}
+        address[] memory authorized,
+        uint256 endTimestamp
+    ) public {
+        _votesPolls.push(
+            VotePoll({
+                title: title, 
+                description: description,
+                nb_for: 0,
+                nb_against: 0,
+                owner: msg.sender,
+                startTimestamp: block.timestamp,
+                endTimestamp: endTimestamp,
+                isActive: true
+            }));
+        
+        _authorized[_votesPolls.length] = authorized;
+    }
 
     function getPoll(uint256 _idx) public view returns (VotePoll memory) {
         return _votesPolls[_idx];
@@ -48,6 +63,6 @@ contract VotingSystem {
     }
 
     function deletePoll(uint256 _idx) public {
-        _votesPolls[_idx].active = false;
+        _votesPolls[_idx].isActive = false;
     }
 }
