@@ -11,6 +11,7 @@ contract VotingSystemTest is Test {
     address george = vm.addr(2);
     address alicia = vm.addr(3);
     address greg = vm.addr(4);
+    address robert = vm.addr(5);
 
     address[] public adr_arr = [fred, george, alicia, greg];
 
@@ -19,6 +20,8 @@ contract VotingSystemTest is Test {
     }
 
     function testCreateVoting() public {
+
+        vm.startPrank(robert);
 
         vot.createPoll(
             "Miss Monde",
@@ -34,5 +37,7 @@ contract VotingSystemTest is Test {
         assertEq(vot.getPoll(0).startTimestamp, block.timestamp);
         assertEq(vot.getPoll(0).endTimestamp, block.timestamp + 1000);
         assertEq(vot.getPoll(0).isActive, true);
+
+        vm.stopPrank();
     }
 }
