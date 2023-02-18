@@ -22,6 +22,16 @@ contract VotingSystem {
     mapping(uint256 => mapping(address => VoteChoice)) private _choices;
 
     VotePoll[] public _votesPolls;
+    address owner;
+
+    constructor() public {
+        owner = address(this);
+    }
+
+    modifier OnlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
 
     function createPoll(
         string memory title,
@@ -31,7 +41,7 @@ contract VotingSystem {
     ) public {
         _votesPolls.push(
             VotePoll({
-                title: title, 
+                title: title,
                 description: description,
                 nb_for: 0,
                 nb_against: 0,
@@ -39,8 +49,9 @@ contract VotingSystem {
                 startTimestamp: block.timestamp,
                 endTimestamp: endTimestamp,
                 isActive: true
-            }));
-        
+            })
+        );
+
         _authorized[_votesPolls.length] = authorized;
     }
 
@@ -53,16 +64,15 @@ contract VotingSystem {
     }
 
     function votePoll(uint256 _idx, VoteChoice choice) public {
-        
         if (choice == VoteChoice.For) {
             _votesPolls[_idx].nb_for++;
-        } else if (choice ==VoteChoice.Against) {
+        } else if (choice == VoteChoice.Against) {
             _votesPolls[_idx].nb_against++;
         }
         _choices[_idx][msg.sender] = choice;
     }
 
-    function deletePoll(uint256 _idx) public {
+    function deletePoll(uint256 _idx, address only_owner) public OnlyOwner {
         _votesPolls[_idx].isActive = false;
     }
 }
