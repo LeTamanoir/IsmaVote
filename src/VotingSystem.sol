@@ -9,10 +9,12 @@ contract VotingSystem {
 
     struct VotePoll {
         string title;
-        string content;
+        string description;
         uint256 nb_for;
         uint256 nb_against;
         address owner;
+        uint256 starttimestamp;
+        uint256 endtimestamp;
         bool active;
     }
 
@@ -23,7 +25,7 @@ contract VotingSystem {
 
     function createPoll(
         string memory title,
-        string memory content,
+        string memory description,
         address[] memory authorized
     ) public {}
 
@@ -35,7 +37,17 @@ contract VotingSystem {
         return _votesPolls;
     }
 
-    function votePoll(uint256 _idx, VoteChoice choice) public {}
+    function votePoll(uint256 _idx, VoteChoice choice) public {
+        
+        if (choice == VoteChoice.For) {
+            _votesPolls[_idx].nb_for++;
+        } else if (choice ==VoteChoice.Against) {
+            _votesPolls[_idx].nb_against++;
+        }
+        _choices[_idx][msg.sender] = choice;
+    }
 
-    function deletePoll(uint256 _idx) public {}
+    function deletePoll(uint256 _idx) public {
+        _votesPolls[_idx].active = false;
+    }
 }
