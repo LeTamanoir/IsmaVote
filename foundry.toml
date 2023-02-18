@@ -4,4 +4,7 @@ out = 'out'
 test = 'contracts/test'
 libs = ['contracts/lib']
 
+[rpc_endpoints]
+goerli = "${GOERLI_RPC_URL}"
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
