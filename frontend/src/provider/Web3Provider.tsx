@@ -4,14 +4,15 @@ import abi from "../abi/VotingSystem.json";
 import Web3Context from "../context/Web3Context";
 
 const CONTRACT_ADDR = import.meta.env.VITE_CONTRACT_ADDR as string;
+const NETWORK_ID = import.meta.env.VITE_APP_CHAIN_ID as string;
 
 const Web3Provider = ({ children }: { children: JSX.Element }): JSX.Element => {
   const [myAddress, setMyAddress] = useState("");
   const [contract, setContract] = useState<any>(null);
+  const ethereum = (window as any).ethereum;
+  const web3 = new Web3(ethereum);
 
   const connectWallet = async () => {
-    const ethereum = (window as any).ethereum;
-
     try {
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
@@ -23,27 +24,32 @@ const Web3Provider = ({ children }: { children: JSX.Element }): JSX.Element => {
   };
 
   const loadContract = () => {
-    const ethereum = (window as any).ethereum;
-    const web3Provider = new Web3(ethereum);
-
     try {
-      let contract = new web3Provider.eth.Contract(abi as any, CONTRACT_ADDR);
+      let contract = new web3.eth.Contract(abi as any, CONTRACT_ADDR);
       setContract(contract);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const checkWallet = async () => {
-    const ethereum = (window as any).ethereum;
+  const switchNetwork = async () => {
+    const chainId = await web3.eth.getChainId();
+    const aimedChain = NETWORK_ID;
 
+    if (chainId.toString() !== aimedChain) {
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: `0x${parseInt(aimedChain, 10).toString(16)}` }],
+      });
+    }
+  };
+
+  const checkWallet = async () => {
     try {
-      const accounts = await ethereum.request({
+      const accounts: string[] = await ethereum.request({
         method: "eth_accounts",
       });
-      if (accounts.length > 0) {
-        setMyAddress(accounts[0]);
-      }
+      if (accounts.length > 0) setMyAddress(accounts[0]);
     } catch (error) {
       console.error(error);
     }
@@ -51,7 +57,7 @@ const Web3Provider = ({ children }: { children: JSX.Element }): JSX.Element => {
 
   useEffect(() => {
     checkWallet();
-    loadContract();
+    switchNetwork().then(() => loadContract());
   }, []);
 
   return (

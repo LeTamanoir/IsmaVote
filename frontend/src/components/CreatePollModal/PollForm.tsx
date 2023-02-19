@@ -82,7 +82,7 @@ const PollForm = ({
         <FormLabel>End date</FormLabel>
         <Input
           placeholder="This poll will last ..."
-          type="datetime-local"
+          type="date"
           onChange={(e) =>
             setData({ enddate: e.target.valueAsDate ?? new Date() })
           }

@@ -6,13 +6,13 @@ import PollList from "../components/PollList";
 import useWeb3 from "../hooks/useWeb3";
 
 const App = (): JSX.Element => {
-  const { myAddress } = useWeb3();
+  const { myAddress, contract } = useWeb3();
 
   return (
     <VStack spacing="10">
       <Navbar />
 
-      {myAddress.length > 0 ? (
+      {myAddress.length > 0 && contract != null ? (
         <>
           <CreatePoll />
           <PollList />

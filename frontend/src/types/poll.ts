@@ -6,6 +6,7 @@ type Poll = {
   startTimestamp: string;
   endTimestamp: string;
   isActive: boolean;
+  isFinished: boolean;
   canVote: boolean;
   alreadyVoted: boolean;
   owner: string;

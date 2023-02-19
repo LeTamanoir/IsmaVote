@@ -34,7 +34,12 @@ const PollItem = ({
       reject: vote === VoteChoie.Against,
       delete: false,
     });
-    await contract.methods.votePoll(pollId, vote).send({ from: myAddress });
+
+    try {
+      await contract.methods.votePoll(pollId, vote).send({ from: myAddress });
+    } catch (e) {
+      console.log(e);
+    }
 
     setLoading({ approve: false, reject: false, delete: false });
     onReload();
@@ -42,7 +47,13 @@ const PollItem = ({
 
   const onDelete = async (pollId: number) => {
     setLoading({ approve: false, reject: false, delete: true });
-    await contract.methods.deletePoll(pollId).send({ from: myAddress });
+
+    try {
+      await contract.methods.deletePoll(pollId).send({ from: myAddress });
+    } catch (e) {
+      console.log(e);
+    }
+
     setLoading({ approve: false, reject: false, delete: false });
     onReload();
   };
@@ -85,7 +96,9 @@ const PollItem = ({
       </CardBody>
 
       <CardFooter pt="0">
-        {poll.canVote ? (
+        {poll.isFinished ? (
+          <Text>Finished {":)"}</Text>
+        ) : poll.canVote ? (
           <ButtonGroup w="full" justifyContent="space-between">
             <Button
               size="sm"
