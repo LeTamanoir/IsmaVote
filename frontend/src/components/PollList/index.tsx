@@ -1,10 +1,11 @@
-import { Flex } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import useWeb3 from "../../hooks/useWeb3";
 import { Poll } from "../../types/poll";
 import PollItem from "./PollItem";
 
 const PollList = (): JSX.Element => {
+  const [isLoading, setIsLoading] = useState(true);
   const { myAddress, contract } = useWeb3();
   const [polls, setPolls] = useState<Poll[]>([]);
 
@@ -26,6 +27,8 @@ const PollList = (): JSX.Element => {
     })) as Poll[];
 
     for (let poll of polls_) {
+      if (poll.isActive == false) continue;
+
       poll.canVote = await contract.methods
         .canVote(poll.id)
         .call({ from: myAddress });
@@ -35,9 +38,11 @@ const PollList = (): JSX.Element => {
     }
 
     setPolls(polls_);
+    setIsLoading(false);
   };
 
   useEffect(() => {
+    setIsLoading(true);
     getPolls();
     window.addEventListener("polls-updated", getPolls);
 
@@ -48,9 +53,15 @@ const PollList = (): JSX.Element => {
 
   return (
     <Flex gap="10" flexWrap="wrap" px="10" pb="10" justifyContent="center">
-      {polls.map((poll) => (
-        <PollItem key={poll.id} poll={poll} onReload={() => getPolls()} />
-      ))}
+      {polls.length > 0 ? (
+        polls
+          .filter((p) => p.isActive)
+          .map((poll) => (
+            <PollItem key={poll.id} poll={poll} onReload={() => getPolls()} />
+          ))
+      ) : (
+        <Spinner size="lg" m="10" />
+      )}
     </Flex>
   );
 };

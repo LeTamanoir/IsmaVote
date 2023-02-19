@@ -1,4 +1,4 @@
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Button,
@@ -25,27 +25,47 @@ const PollItem = ({
   const [loading, setLoading] = useState({
     approve: false,
     reject: false,
+    delete: false,
   });
 
-  const vote = async (pollId: number, vote: VoteChoie) => {
+  const onVote = async (pollId: number, vote: VoteChoie) => {
     setLoading({
       approve: vote === VoteChoie.For,
       reject: vote === VoteChoie.Against,
+      delete: false,
     });
-    const data = await contract.methods
-      .votePoll(pollId, vote)
-      .send({ from: myAddress });
+    await contract.methods.votePoll(pollId, vote).send({ from: myAddress });
 
-    setLoading({ approve: false, reject: false });
+    setLoading({ approve: false, reject: false, delete: false });
+    onReload();
+  };
+
+  const onDelete = async (pollId: number) => {
+    setLoading({ approve: false, reject: false, delete: true });
+    await contract.methods.deletePoll(pollId).send({ from: myAddress });
+    setLoading({ approve: false, reject: false, delete: false });
     onReload();
   };
 
   return (
     <Card w="md">
       <CardBody>
-        <Heading size="lg" mb="2" color="facebook.900">
-          {poll.title}
-        </Heading>
+        <Flex justifyContent="space-between">
+          <Heading size="lg" mb="2" color="facebook.900">
+            {poll.title}
+          </Heading>
+          {poll.owner.toLowerCase() == myAddress && (
+            <Button
+              size="sm"
+              isLoading={loading.delete}
+              variant="ghost"
+              colorScheme="red"
+              onClick={() => onDelete(poll.id)}
+            >
+              <DeleteIcon />
+            </Button>
+          )}
+        </Flex>
         <Text>{poll.description}</Text>
 
         <Flex direction="column" mt="2">
@@ -71,7 +91,7 @@ const PollItem = ({
               size="sm"
               colorScheme="red"
               isLoading={loading.reject}
-              onClick={() => vote(poll.id, VoteChoie.Against)}
+              onClick={() => onVote(poll.id, VoteChoie.Against)}
             >
               <CloseIcon mr="2" />
               Reject
@@ -80,7 +100,7 @@ const PollItem = ({
               size="sm"
               isLoading={loading.approve}
               colorScheme="green"
-              onClick={() => vote(poll.id, VoteChoie.For)}
+              onClick={() => onVote(poll.id, VoteChoie.For)}
             >
               <CheckIcon mr="2" />
               Approve
