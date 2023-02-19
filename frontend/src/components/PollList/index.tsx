@@ -38,6 +38,8 @@ const PollList = (): JSX.Element => {
       } catch (_) {
         poll.isFinished = true;
       }
+
+      console.log(poll);
     }
 
     setIsLoading(false);

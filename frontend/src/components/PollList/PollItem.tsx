@@ -98,6 +98,8 @@ const PollItem = ({
       <CardFooter pt="0">
         {poll.isFinished ? (
           <Text>Finished {":)"}</Text>
+        ) : poll.alreadyVoted ? (
+          <Text>You already voted</Text>
         ) : poll.canVote ? (
           <ButtonGroup w="full" justifyContent="space-between">
             <Button
@@ -119,8 +121,6 @@ const PollItem = ({
               Approve
             </Button>
           </ButtonGroup>
-        ) : poll.alreadyVoted ? (
-          <Text>You already voted</Text>
         ) : (
           <Text>You can't vote</Text>
         )}
