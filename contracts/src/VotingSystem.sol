@@ -33,6 +33,10 @@ contract VotingSystem {
         require(_idx < _votePolls.length, "Invalid index");
         _;
     }
+    
+    modifier IsTimeStampFinish(uint256 _idx) {
+        require(_votePolls[_idx].endTimestamp < block.timestamp);
+    }
 
     modifier IsActive(uint256 _idx) {
         require(_votePolls[_idx].isActive == true, "Poll is not active");
