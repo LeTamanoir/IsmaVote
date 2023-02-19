@@ -104,7 +104,7 @@ contract VotingSystem {
     }
 
     function canVote(uint256 _idx) public view IsValidIdx(_idx) IsActive(_idx) IsTimeStampFinish(_idx) returns (bool) {
-        return !alreadyVoted(_idx) && isAuthorizedAddress(_idx, msg.sender);
+        return isAuthorizedAddress(_idx, msg.sender);
     }
 
     function alreadyVoted(uint256 _idx)

@@ -28,8 +28,6 @@ const PollList = (): JSX.Element => {
     })) as Poll[];
 
     for (let poll of polls_) {
-      if (poll.isActive == false) continue;
-
       try {
         poll.canVote = await contract.methods
           .canVote(poll.id)

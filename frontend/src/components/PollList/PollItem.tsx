@@ -120,9 +120,9 @@ const PollItem = ({
             </Button>
           </ButtonGroup>
         ) : poll.alreadyVoted ? (
-          <Text>You already voted {":)"}</Text>
+          <Text>You already voted</Text>
         ) : (
-          <Text>You can't vote {":("}</Text>
+          <Text>You can't vote</Text>
         )}
       </CardFooter>
     </Card>
