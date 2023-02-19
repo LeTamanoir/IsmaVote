@@ -1,7 +1,8 @@
-# IsmaVote
-Secure voting platform
+# IsmaVote 🗳️
 
+Welcome to our **2-day hackathon** focused on building a decentralized voting poll platform using **React** and **Solidity**!
 
+<br>
 
 <img width="600" src="https://user-images.githubusercontent.com/51637671/219949371-162a7bef-8878-4294-8719-fa64155f0969.png">
 
