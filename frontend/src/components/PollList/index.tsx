@@ -28,6 +28,8 @@ const PollList = (): JSX.Element => {
     })) as Poll[];
 
     for (let poll of polls_) {
+      if (poll.isActive == false) continue;
+
       try {
         poll.canVote = await contract.methods
           .canVote(poll.id)
@@ -35,11 +37,9 @@ const PollList = (): JSX.Element => {
         poll.alreadyVoted = await contract.methods
           .alreadyVoted(poll.id)
           .call({ from: myAddress });
-      } catch (_) {
+      } catch (e) {
         poll.isFinished = true;
       }
-
-      console.log(poll);
     }
 
     setIsLoading(false);

@@ -77,7 +77,7 @@ const PollItem = ({
             </Button>
           )}
         </Flex>
-        <Text>{poll.description}</Text>
+        <Text whiteSpace="pre">{poll.description}</Text>
 
         <Flex direction="column" mt="2">
           <Text>

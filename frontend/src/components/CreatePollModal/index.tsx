@@ -5,7 +5,6 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
   ModalBody,
   ModalFooter,
 } from "@chakra-ui/react";
@@ -90,8 +89,8 @@ const CreatePoll = (): JSX.Element => {
       .send({ from: myAddress })
       .then(() => {
         setIsLoading(false);
-        window.dispatchEvent(new Event("polls-updated"));
         close();
+        window.dispatchEvent(new Event("polls-updated"));
       });
   };
 

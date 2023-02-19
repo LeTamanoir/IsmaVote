@@ -124,7 +124,7 @@ contract VotingSystem {
 
         if (choice == VoteChoice.For) {
             _votePolls[_idx].nb_for++;
-        } else if (choice == VoteChoice.Against) {
+        } else {
             _votePolls[_idx].nb_against++;
         }
         _choices[_idx][msg.sender] = choice;
