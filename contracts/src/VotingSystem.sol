@@ -44,6 +44,17 @@ contract VotingSystem {
         _;
     }
 
+    function numberIsActive() public view returns (uint256) {
+        uint256 n = 0;
+
+        for (uint i = 0; i < _votePolls.length; i++) {
+            if (_votePolls[i].isActive == true) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     function isAuthorizedAddress(uint256 _idx, address _addr) private view returns (bool) {
         address[] memory authedAddress = _authorized[_idx];
 
@@ -65,6 +76,7 @@ contract VotingSystem {
         require(bytes(description).length > 0, "Empty description");
         require(endTimestamp > block.timestamp, "Bad endtime");
         require(authorized.length > 0, "Empty voters");
+        require(numberIsActive() < 10, "Too many active polls");
 
         _authorized[_votePolls.length] = authorized;
         _votePolls.push(
