@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 enum VoteChoice {
+    Unset,
     For,
     Against
 }
@@ -20,7 +21,7 @@ struct VotePoll {
 contract VotingSystem {
     mapping(uint256 => address[]) private _authorized;
     mapping(uint256 => mapping(address => VoteChoice)) private _choices;
-    VotePoll[] private _votesPolls;
+    VotePoll[] private _votePolls;
 
     address owner;
 
@@ -28,9 +29,30 @@ contract VotingSystem {
         owner = address(this);
     }
 
-    modifier OnlyOwner() {
-        require(msg.sender == owner);
+    modifier IsValidIdx(uint256 _idx) {
+        require(_idx < _votePolls.length, "Invalid index");
         _;
+    }
+
+    modifier IsActive(uint256 _idx) {
+        require(_votePolls[_idx].isActive == true, "Poll is not active");
+        _;
+    }
+
+    modifier IsPollOwner(uint256 _idx) {
+        require(_votePolls[_idx].owner == msg.sender, "You are not the owner of the poll");
+        _;
+    }
+
+    function isAuthorizedAddress(uint256 _idx) private view returns (bool) {
+        address[] memory authedAddress = _authorized[_idx];
+
+        for (uint256 i = 0; i < authedAddress.length; i++) {
+            if (msg.sender == authedAddress[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function createPoll(
@@ -39,13 +61,13 @@ contract VotingSystem {
         address[] memory authorized,
         uint256 endTimestamp
     ) public {
-        require(bytes(title).length != 0, "Wrong EndTime inputted");
-        require(bytes(description).length != 0, "Wrong EndTime inputted");
-        require(endTimestamp > block.timestamp, "Wrong EndTime inputted");
+        require(bytes(title).length > 0, "Empty title");
+        require(bytes(description).length > 0, "Empty description");
+        require(endTimestamp > block.timestamp, "Bad endtime");
+        require(authorized.length > 0, "Empty voters");
 
-        _authorized[_votesPolls.length] = authorized;
-
-        _votesPolls.push(
+        _authorized[_votePolls.length] = authorized;
+        _votePolls.push(
             VotePoll({
                 title: title,
                 description: description,
@@ -59,37 +81,27 @@ contract VotingSystem {
         );
     }
 
-    function getPoll(uint256 _idx) private view returns (VotePoll memory) {
-        return _votesPolls[_idx];
+    function getPoll(uint256 _idx) public view IsValidIdx(_idx) IsActive(_idx) returns (VotePoll memory) {
+        return _votePolls[_idx];
     }
 
-    function getPolls() private view returns (VotePoll[] memory) {
-        return _votesPolls;
+    function getPolls() public view returns (VotePoll[] memory) {
+        return _votePolls;
     }
 
-    function isAuthorizedAddress(uint256 _idx) public view returns (bool) {
-        address[] memory authorizedAddresses = _authorized[_idx];
-
-        for (uint i = 0; i < authorizedAddresses.length; i++) {
-            if (msg.sender == authorizedAddresses[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function votePoll(uint256 _idx, VoteChoice choice) public {
+    function votePoll(uint256 _idx, VoteChoice choice) public IsValidIdx(_idx) IsActive(_idx) {
         require(isAuthorizedAddress(_idx), "Invalid Address");
-        
+        require(_choices[_idx][msg.sender] == VoteChoice.Unset, "Already voted");
+
         if (choice == VoteChoice.For) {
-            _votesPolls[_idx].nb_for++;
+            _votePolls[_idx].nb_for++;
         } else if (choice == VoteChoice.Against) {
-            _votesPolls[_idx].nb_against++;
+            _votePolls[_idx].nb_against++;
         }
         _choices[_idx][msg.sender] = choice;
     }
 
-    function deletePoll(uint256 _idx) public OnlyOwner {
-        _votesPolls[_idx].isActive = false;
+    function deletePoll(uint256 _idx) public IsPollOwner(_idx) IsValidIdx(_idx) {
+        _votePolls[_idx].isActive = false;
     }
 }
