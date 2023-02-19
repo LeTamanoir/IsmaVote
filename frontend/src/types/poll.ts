@@ -1,10 +1,22 @@
 type Poll = {
   title: string;
   description: string;
-  enddate: Date;
-  authorized: string[];
-  address: string;
+  nb_against: string;
+  nb_for: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  isActive: boolean;
+  canVote: boolean;
+  alreadyVoted: boolean;
+  owner: string;
+  id: number;
 };
+
+enum VoteChoie {
+  Unset,
+  For,
+  Against,
+}
 
 type CreatePoll = {
   title: string;
@@ -21,3 +33,4 @@ type CreatePollError = {
 };
 
 export type { Poll, CreatePoll, CreatePollError };
+export { VoteChoie };

@@ -9,18 +9,15 @@ import {
   ModalBody,
   ModalFooter,
 } from "@chakra-ui/react";
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import PollForm from "./PollForm";
 import type { CreatePoll, CreatePollError } from "../../types/poll";
+import useWeb3 from "../../hooks/useWeb3";
 
-const CreatePoll = ({
-  contract,
-  myAddress,
-}: {
-  contract: any;
-  myAddress: string;
-}): JSX.Element => {
+const CreatePoll = (): JSX.Element => {
+  const { contract, myAddress } = useWeb3();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useReducer(
     (p: CreatePoll, n: Partial<CreatePoll>) => ({ ...p, ...n }),
     {
@@ -82,7 +79,8 @@ const CreatePoll = ({
       return;
     }
 
-    contract.current.methods
+    setIsLoading(true);
+    contract.methods
       .createPoll(
         data.title,
         data.description,
@@ -90,10 +88,11 @@ const CreatePoll = ({
         data.enddate.getTime()
       )
       .send({ from: myAddress })
-      .then((e: any) => {
-
+      .then(() => {
+        setIsLoading(false);
+        window.dispatchEvent(new Event("polls-updated"));
+        close();
       });
-    onClose();
   };
 
   const close = () => {
@@ -118,7 +117,6 @@ const CreatePoll = ({
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Create poll</ModalHeader>
-          <ModalCloseButton />
           <ModalBody>
             <PollForm
               setData={setData}
@@ -129,10 +127,19 @@ const CreatePoll = ({
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blackAlpha" mr={3} onClick={close}>
+            <Button
+              colorScheme="blackAlpha"
+              mr={3}
+              onClick={close}
+              isDisabled={isLoading}
+            >
               Cancel
             </Button>
-            <Button colorScheme="facebook" onClick={submit}>
+            <Button
+              colorScheme="facebook"
+              onClick={submit}
+              isLoading={isLoading}
+            >
               Create
             </Button>
           </ModalFooter>

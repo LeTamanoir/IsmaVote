@@ -13,15 +13,6 @@ contract VotingSystemDeployScript is Script {
 
         VotingSystem system = new VotingSystem();
 
-        // address[] memory authed = new address[](2);
-        // authed[0] = address(tx.origin);
-
-        // system.createPoll("Hello", "dire bonjour en anglais", authed, 12112211221);
-
-        // VotePoll memory poll_ = system.getPoll(0);
-
-        // console.log("poll_.title", poll_.title);
-
         console.log("VotingSystem deployed", address(system));
     }
 }

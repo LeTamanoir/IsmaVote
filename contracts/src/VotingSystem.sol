@@ -23,10 +23,10 @@ contract VotingSystem {
     mapping(uint256 => mapping(address => VoteChoice)) private _choices;
     VotePoll[] private _votePolls;
 
-    address owner;
+    address private _owner;
 
     constructor() {
-        owner = address(this);
+        _owner = address(this);
     }
 
     modifier IsValidIdx(uint256 _idx) {
@@ -44,11 +44,11 @@ contract VotingSystem {
         _;
     }
 
-    function isAuthorizedAddress(uint256 _idx) private view returns (bool) {
+    function isAuthorizedAddress(uint256 _idx, address _addr) private view returns (bool) {
         address[] memory authedAddress = _authorized[_idx];
 
         for (uint256 i = 0; i < authedAddress.length; i++) {
-            if (msg.sender == authedAddress[i]) {
+            if (_addr == authedAddress[i]) {
                 return true;
             }
         }
@@ -89,9 +89,17 @@ contract VotingSystem {
         return _votePolls;
     }
 
+    function canVote(uint256 _idx) public view IsValidIdx(_idx) IsActive(_idx) returns (bool) {
+        return !alreadyVoted(_idx) && isAuthorizedAddress(_idx, msg.sender);
+    }
+
+    function alreadyVoted(uint256 _idx) public view IsValidIdx(_idx) IsActive(_idx) returns (bool) {
+        return _choices[_idx][msg.sender] != VoteChoice.Unset;
+    }
+
     function votePoll(uint256 _idx, VoteChoice choice) public IsValidIdx(_idx) IsActive(_idx) {
-        require(isAuthorizedAddress(_idx), "Invalid Address");
-        require(_choices[_idx][msg.sender] == VoteChoice.Unset, "Already voted");
+        require(isAuthorizedAddress(_idx, msg.sender), "Invalid Address");
+        require(!alreadyVoted(_idx), "Already voted");
 
         if (choice == VoteChoice.For) {
             _votePolls[_idx].nb_for++;

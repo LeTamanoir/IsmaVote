@@ -1,68 +1,57 @@
-import { VStack } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import useWeb3 from "../../hooks/useWeb3";
 import { Poll } from "../../types/poll";
 import PollItem from "./PollItem";
 
-const TEMP: Poll[] = [
-  {
-    authorized: [],
-    enddate: new Date("2021-10-10"),
-    title: "Is isma a goat ?",
-    description: "Is isma a goat ?",
-    address: "0x000000",
-  },
-  {
-    authorized: [],
-    enddate: new Date("2021-10-10"),
-    title: "Is isma a goat ?",
-    description: "Is isma a goat ?",
-    address: "0x000001",
-  },
-];
-
-const PollList = ({
-  myAddress,
-  contract,
-}: {
-  myAddress: string;
-  contract: any;
-}): JSX.Element => {
+const PollList = (): JSX.Element => {
+  const { myAddress, contract } = useWeb3();
   const [polls, setPolls] = useState<Poll[]>([]);
 
+  const getPolls = async () => {
+    const polls = await contract.methods.getPolls().call({ from: myAddress });
+
+    const polls_ = polls.map((poll: any, _idx: number) => ({
+      title: poll.title,
+      description: poll.description,
+      nb_against: poll.nb_against,
+      nb_for: poll.nb_for,
+      startTimestamp: poll.startTimestamp,
+      endTimestamp: poll.endTimestamp,
+      isActive: poll.isActive,
+      canVote: false,
+      alreadyVoted: false,
+      owner: poll.owner,
+      id: _idx,
+    })) as Poll[];
+
+    for (let poll of polls_) {
+      poll.canVote = await contract.methods
+        .canVote(poll.id)
+        .call({ from: myAddress });
+      poll.alreadyVoted = await contract.methods
+        .alreadyVoted(poll.id)
+        .call({ from: myAddress });
+    }
+
+    setPolls(polls_);
+  };
+
   useEffect(() => {
-    // setPolls(TEMP);
+    getPolls();
+    window.addEventListener("polls-updated", getPolls);
 
-    if (contract.current == null) return;
-
-    console.log(contract.current.methods.getPolls());
-
-
-    // contract.current.methods
-    //   .getPoll(0)
-    //   .send({ from: myAddress })
-    //   .then((poll: Poll) => {
-    //     console.log(poll);
-    //   });
-
-    // .call()
-    // .then((polls: Poll[]) => {
-    //   // setPolls(polls);
-    //   console.log(polls);
-    // });
+    return () => {
+      window.removeEventListener("polls-updated", getPolls);
+    };
   }, []);
 
   return (
-    <VStack spacing="10">
+    <Flex gap="10" flexWrap="wrap" px="10" pb="10" justifyContent="center">
       {polls.map((poll) => (
-        <PollItem myAddress={myAddress} key={poll.address} poll={poll} />
+        <PollItem key={poll.id} poll={poll} onReload={() => getPolls()} />
       ))}
-
-      <button onClick={() => {
-        contract.current.methods.getPolls().call();
-      }}>
-        test
-      </button>
-    </VStack>
+    </Flex>
   );
 };
 

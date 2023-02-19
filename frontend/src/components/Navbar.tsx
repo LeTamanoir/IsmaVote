@@ -1,7 +1,8 @@
 import { Heading, HStack, Image, Text } from "@chakra-ui/react";
+import useWeb3 from "../hooks/useWeb3";
 
-const Navbar = ({ myAddress }: { myAddress: string }): JSX.Element => {
-  console.log(myAddress);
+const Navbar = (): JSX.Element => {
+  const { myAddress } = useWeb3();
 
   return (
     <HStack

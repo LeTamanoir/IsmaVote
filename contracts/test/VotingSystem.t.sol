@@ -64,6 +64,7 @@ contract VotingSystemTest is Test {
         vm.stopPrank();
 
         vm.startPrank(george);
+        assertEq(_vot.canVote(0), true);
         _vot.votePoll(0, VoteChoice.For);
         assertEq(_vot.getPoll(0).nb_for, 1);
 
@@ -84,6 +85,7 @@ contract VotingSystemTest is Test {
         vm.stopPrank();
 
         vm.startPrank(albert);
+        assertEq(_vot.canVote(0), false);
         vm.expectRevert();
         _vot.votePoll(0, VoteChoice.For);
         vm.stopPrank();
